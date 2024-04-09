@@ -16,7 +16,7 @@ In my scientific calculator, there is a built-in `binary tree` whose leaf nodes 
 - 2. To get the parameters according to the type of the function.
 The leaf nodes store two key components: the type of the function and the `function pointer`. We learned how many parameters a function takes and the types of the parameters (`double` or `int`) from the type of the function. For example, `int` (`int`,`int`) is a type of the function, which means that the function takes two integer parameters and returns an integer as the result. It is obvious that all the functions of the same type share the same parsing process.
 
-  After we get the type of the function from the leaf nodes, it is the function `getParameters()`'s duty to get the parameters of the function. The function `getParameters()` will take care of the comma-delimited numbers in the brackets and check the type and number of the parameters.
+- After we get the type of the function from the leaf nodes, it is the function `getParameters()`'s duty to get the parameters of the function. The function `getParameters()` will take care of the comma-delimited numbers in the brackets and check the type and number of the parameters.
 
 - 3. To calculate the value. Since the function `getParameters()` have got all the needed parameters of the function, it is easy to pass the parameters to the function and call the function using the `function pointer`. Hence, we are able to calculate the value of the function.
 
