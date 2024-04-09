@@ -4,7 +4,7 @@
 
 - Our scientific calculator can process complicated expressions; It can deal with different formats (for example, sometimes 0.9 is represented as .9, or 3*sin(0.5) is represented as 3sin(0.5));
 
-![](/demo/INum.png)
+![](/demo/lNum.png)
 
 - Our scientific calculator can perform type and grammar checks, and report what is wrong in user's input;
 
