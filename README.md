@@ -1,6 +1,8 @@
 # Scientific Calculator
 
-## 1. Introduction
+## 1. Demo
+
+## 2. Introduction
 
 This is the course project for `Data Structure`.
 
@@ -23,5 +25,3 @@ Recurrence. By 1 to 3 we are able to calculate the value of a sub-expression. Re
 As long as we give the correct type and pointer of the function and rebuild the binary tree, the calculator is able to process arbitrary self-defined functions.
 
 In the advanced edition, I tried to implement the functions of numerical integration and statistics. For example, we can input function_name(lower_bound:upper_bound:step) to calculate the numerical integration approximately and we can input sd/var/avg(variable1,variable2,...) to calculate the standard deviation/variance/average of the data.
-
-## 2. Demo
