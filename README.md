@@ -2,7 +2,7 @@
 
 ## 1. Demo
 
-## 2. Introduction
+## 2. Implementation Overview
 
 This is the course project for `Data Structure`.
 
