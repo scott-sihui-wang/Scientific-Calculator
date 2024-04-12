@@ -12,7 +12,7 @@
 
 - In the advanced edition, our scientific calculator can calculate `numerical integration` and `statistics`.
 
-![](/demo/integral.png)
+![](/demo/adv.png)
 
 ## 2. Implementation Overview
 
