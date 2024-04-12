@@ -39,3 +39,7 @@ In the advanced edition, I tried to implement the functions of `numerical integr
 ## 3. Note
 
 The code can be compiled and built under `Windows 11` + `Dev C++ 6.3`. Please make sure that the compiler option `-fpermissive` is enabled so that you won't receive any errors.
+
+In `Embarcadero Dev-C++ 6.3`, you need to find `Compiler Options...` under `Tools` menu, and add the `-fpermissive` command like this:
+
+![compiler option](/demo/options.png)
