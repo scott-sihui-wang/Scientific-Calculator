@@ -18,7 +18,7 @@
 
 This is the course project for `Data Structure`.
 
-In this project, I designed a text-parsing framework that is able to handle most of the usual operators and functions in the mathematical expressions and calculate the value of the expressions. Please refer to my [report](/report/Report.pdf) to check out full technical details of this project.
+In this project, I designed a text-parsing framework that is able to handle most of the usual operators and functions in the mathematical expressions and calculate the value of the expressions. Please refer to my [report](/report/Report.pdf) (in Chinese) to check out full technical details of this project.
 
 The general text-parsing process of my `scientific calculator` is as follows:
 
