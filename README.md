@@ -35,3 +35,7 @@ The leaf nodes store two key components: the type of the function and the `funct
 As long as we give the correct type and pointer of the function and rebuild the binary tree, the calculator is able to process arbitrary self-defined functions.
 
 In the advanced edition, I tried to implement the functions of `numerical integration` and `statistics`. For example, we can input `function_name` ( `lower_bound` : `upper_bound` : `step` ) to calculate the `numerical integration` approximately and we can input `sd`/`var`/`avg`(`variable1`, `variable2`, ...) to calculate the standard deviation/variance/average of the data.
+
+## 3. Note
+
+The code can be compiled and built under `Windows 11` + `Dev C++ 6.3`. Please make sure that the `compiler option`: `-fpermissive` is enabled so that you won't receive any errors.
