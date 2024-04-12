@@ -1,5 +1,9 @@
 # Scientific Calculator
 
+**Topics:** _Data Structures_, _Algorithm Design_
+
+**Skills:** _C++_
+
 ## 1. Demo
 
 - Our scientific calculator can process complicated expressions; It can deal with different formats (for example, sometimes 0.9 is represented as .9, or 3*sin(0.5) is represented as 3sin(0.5));
