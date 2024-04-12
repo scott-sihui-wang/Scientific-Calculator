@@ -4,15 +4,15 @@
 
 - Our scientific calculator can process complicated expressions; It can deal with different formats (for example, sometimes 0.9 is represented as .9, or 3*sin(0.5) is represented as 3sin(0.5));
 
-![](/demo/lNum.png)
+![](/demo/basic_func.png)
 
 - Our scientific calculator can perform type and grammar checks, and report what is wrong in user's input;
 
-![](/demo/prog.png)
+![](/demo/basic_check.png)
 
 - In the advanced edition, our scientific calculator can calculate `numerical integration` and `statistics`.
 
-![](/demo/adv.png)
+![](/demo/adv_int_stat.png)
 
 ## 2. Implementation Overview
 
