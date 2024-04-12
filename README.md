@@ -10,7 +10,7 @@
 
 ![](/demo/prog.png)
 
-- In the advanced edition, our scientif calculator can calculate `numerical integration` and `statistics`.
+- In the advanced edition, our scientific calculator can calculate `numerical integration` and `statistics`.
 
 ![](/demo/integral.png)
 
