@@ -1,78 +1,8 @@
 #include<iostream>
 #include<iomanip>
 #include<cmath>
-#define debug
+#include<queue>
 using namespace std;
-
-template<typename T>class queue{
-private:
-	static const int BLOCKSIZE=1024;
-	template<typename S>struct queueNode{
-		S data[BLOCKSIZE];
-		queueNode<S>* prev;
-		queueNode<S>* next;
-	};
-	queueNode<T>* frontNode;
-	queueNode<T>* tailNode;
-	T* frontPtr;
-	T* tailPtr;
-public:
-	queue(){
-		tailNode=new queueNode<T>;
-		frontNode=tailNode;
-		tailNode->prev=NULL;
-		tailNode->next=NULL;
-		frontPtr=(frontNode->data)-1;
-		tailPtr=(tailNode->data)-1;
-	}
-	~queue(){
-		queueNode<T>* ptr;
-		while(tailNode!=NULL){
-			ptr=tailNode;
-			tailNode=tailNode->prev;
-			delete ptr;
-		}
-	}
-	void push(const T& x){
-		if(tailPtr-(tailNode->data)==BLOCKSIZE-1){
-			tailNode->next=new queueNode<T>;
-			tailNode->next->prev=tailNode;
-			tailNode->next->next=NULL;
-			tailNode=tailNode->next;
-			tailPtr=tailNode->data;
-		}
-		else{
-			if(tailPtr==(frontNode->data)-1){
-				++frontPtr;
-			}
-			++tailPtr;
-		}
-		*tailPtr=x;
-	}
-	T pop(){
-		if(frontPtr==(tailNode->data)-1)return NULL;
-		T x=*frontPtr;
-		if(frontPtr==tailPtr){
-			frontPtr=(frontNode->data)-1;
-			tailPtr=(tailNode->data)-1;
-		}
-		else if(frontPtr-(frontNode->data)==BLOCKSIZE-1){
-			frontNode=frontNode->next;
-			delete frontNode->prev;
-			frontNode->prev=NULL;
-			frontPtr=frontNode->data;
-		}
-		else{
-			++frontPtr;
-		}
-		return x;
-	}
-	bool isEmpty(){
-		if(tailNode->prev==NULL&&tailPtr==(tailNode->data)-1)return true;
-		return false;
-	}
-};
-
 double Add(double a,double b){
 	return a+b;
 }
@@ -100,16 +30,13 @@ double Fail(double a,double b){
 	return -1;
 }
 bool isNumber(char ch){
-	if(ch>='0'&&ch<='9')return true;
-	return false;
+	return (ch>='0'&&ch<='9');
 }
 bool isAlphabet(char ch){
-	if((ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z'))return true;
-	return false;
+	return ((ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z'));
 }
 bool isOperator(char ch){
-	if(ch=='+'||ch=='-'||ch=='*'||ch=='/'||ch=='^'||ch=='!'||ch=='%')return true;
-	return false;
+	return (ch=='+'||ch=='-'||ch=='*'||ch=='/'||ch=='^'||ch=='!'||ch=='%');
 }
 const int precision=10;
 bool equal(double a,double b){
@@ -132,7 +59,6 @@ char* substr(char* ch,int begin,int end){
 	return subCh;
 }
 const int nameLength=10;
-
 void tagCopy(char* dest,char* src,int n=nameLength){
 	for(int i=0;i<n-1;i++){
 		dest[i]=src[i];
@@ -144,9 +70,11 @@ private:
 	struct errorInfo{
 		int position;
 		int errCode;
+		errorInfo(int code):errCode(code){}
+		errorInfo(int code,int pos):errCode(code),position(pos){}
 	};
 	struct term{
-		union{
+		union termValue{
 			int ival;
 			double dval;
 			double(*ptr1)(double,double);
@@ -154,13 +82,32 @@ private:
 			int(*ptr3)(int,int);
 			int(*ptr4)(int);
 		}val;
-		enum{
+		enum termType{
 			Int,Float,biDouble,uniDouble,biInt,uniInt
 		}attribute;
-		enum{
+		enum oprType{
 			None,L,R,LR,RR
 		}category;
 		int position;
+		term(){}
+		term(int value,int pos,termType term_type,oprType opr_type):attribute(term_type),category(opr_type),position(pos){
+			val.ival=value;
+		}
+		term(double value,int pos,termType term_type,oprType opr_type):attribute(term_type),category(opr_type),position(pos){
+			val.dval=value;
+		}
+		term(double(*p)(double,double),int pos,termType term_type,oprType opr_type):attribute(term_type),category(opr_type),position(pos){
+			val.ptr1=p;
+		}
+		term(double(*p)(double),int pos,termType term_type,oprType opr_type):attribute(term_type),category(opr_type),position(pos){
+			val.ptr2=p;
+		}
+		term(int(*p)(int,int),int pos,termType term_type,oprType opr_type):attribute(term_type),category(opr_type),position(pos){
+			val.ptr3=p;
+		}
+		term(int(*p)(int),int pos,termType term_type,oprType opr_type):attribute(term_type),category(opr_type),position(pos){
+			val.ptr4=p;
+		}
 		void print(){
 			switch(attribute){
 				case Int:
@@ -169,91 +116,22 @@ private:
 				case Float:
 					cout<<setprecision(precision)<<val.dval;
 					break;
-				case biDouble:
-					if(val.ptr1==Add){
-						cout<<'+';
-					}
-					else if(val.ptr1==Minus){
-						cout<<'-';
-					}
-					else if(val.ptr1==Multiply){
-						cout<<'*';
-					}
-					else if(val.ptr1==Divide){
-						cout<<'/';
-					}
-					else if(val.ptr1==pow){
-						cout<<"pow";
-					}
-					else if(val.ptr1==Fail){
-						cout<<"Error";
-					}
-					break;
-				case uniDouble:
-					if(val.ptr2==fabs){
-						cout<<"abs";
-					}
-					else if(val.ptr2==acos){
-						cout<<"acos";
-					}
-					else if(val.ptr2==asin){
-						cout<<"asin";
-					}
-					else if(val.ptr2==atan){
-						cout<<"atan";
-					}
-					else if(val.ptr2==cos){
-						cout<<"cos";
-					}
-					else if(val.ptr2==exp){
-						cout<<"exp";
-					}
-					else if(val.ptr2==log){
-						cout<<"ln";
-					}
-					else if(val.ptr2==log10){
-						cout<<"log";
-					}
-					else if(val.ptr2==sqrt){
-						cout<<"sqrt";
-					}
-					else if(val.ptr2==sin){
-						cout<<"sin";
-					}
-					else if(val.ptr2==tan){
-						cout<<"tan";
-					}
-					break;
-				case biInt:
-					if(val.ptr3==Mod){
-						cout<<'%';
-					}
-					break;
-				case uniInt:
-					if(val.ptr4==Factorial){
-						cout<<'!';
-					}
-					break;
 				default:
 					cout<<"Error";
 			}
 		}
 	};
-
 	struct termNode{
 		term data;
 		termNode* prev;
 		termNode* next;
 	};
-
 	struct termList{
 		termNode* front;
 		termNode* tail;
-		unsigned int count;
 		termList(){
 			front=NULL;
 			tail=NULL;
-			count=0;
 		}
 		~termList(){
 			termNode* p;
@@ -278,7 +156,6 @@ private:
 				tail->next->next=NULL;
 				tail=tail->next;
 			}
-			++count;
 		}
 		errorInfo mergeAdjacent(termNode* t){
 			termNode* begin;
@@ -300,10 +177,7 @@ private:
 							val_int=((t->data).val.ptr4)(i1);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=8;
-							tmp.position=begin->data.position;
-							return tmp;
+							return errorInfo(8,begin->data.position);
 						}
 						begin->data.category=term::None;
 						begin->data.attribute=term::Int;
@@ -319,10 +193,7 @@ private:
 							val_double=((t->data).val.ptr2)(d1);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=10;
-							tmp.position=begin->data.position;
-							return tmp;
+							return errorInfo(10,begin->data.position);
 						}
 						begin->data.category=term::None;
 						if(equal(val_double,(int)val_double)){
@@ -345,10 +216,7 @@ private:
 							val_int=((t->data).val.ptr4)(i1);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=8;
-							tmp.position=del->data.position;
-							return tmp;
+							return errorInfo(8,del->data.position);
 						}
 						begin->data.category=term::None;
 						begin->data.attribute=term::Int;
@@ -364,10 +232,7 @@ private:
 							val_double=((t->data).val.ptr2)(d1);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=10;
-							tmp.position=del->data.position;
-							return tmp;
+							return errorInfo(10,del->data.position);
 						}
 						begin->data.category=term::None;
 						if(equal(val_double,(int)val_double)){
@@ -407,15 +272,13 @@ private:
 							val_double=((t->data).val.ptr1)(d1,d2);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=11;
 							if(begin->data.attribute!=term::Int&&begin->data.attribute!=term::Float){
-								tmp.position=begin->data.position;
+								return errorInfo(11,begin->data.position);
 							}
 							else if(del2->data.attribute!=term::Int&&del2->data.attribute!=term::Float){
-								tmp.position=del2->data.position;
+								return errorInfo(11,del2->data.position);
 							}
-							return tmp;
+							return errorInfo(11);
 						}
 						begin->data.category=term::None;
 						if(equal(val_double,(int)val_double)){
@@ -434,15 +297,13 @@ private:
 							val_int=((t->data).val.ptr3)(i1,i2);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=9;
 							if(begin->data.attribute!=term::Int){
-								tmp.position=begin->data.position;
+								return errorInfo(9,begin->data.position);
 							}
 							else if(del2->data.attribute!=term::Int){
-								tmp.position=del2->data.position;
+								return errorInfo(9,del2->data.position);
 							}
-							return tmp;
+							return errorInfo(9);
 						}
 						begin->data.category=term::None;
 						begin->data.attribute=term::Int;
@@ -476,15 +337,13 @@ private:
 							val_double=((t->data).val.ptr1)(d1,d2);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=11;
 							if(del->data.attribute!=term::Int&&del->data.attribute!=term::Float){
-								tmp.position=del->data.position;
+								return errorInfo(11,del->data.position);
 							}
 							else if(del2->data.attribute!=term::Int&&del2->data.attribute!=term::Float){
-								tmp.position=del2->data.position;
+								return errorInfo(11,del2->data.position);
 							}
-							return tmp;
+							return errorInfo(11);
 						}
 						begin->data.category=term::None;
 						if(equal(val_double,(int)val_double)){
@@ -503,15 +362,13 @@ private:
 							val_int=((t->data).val.ptr3)(i1,i2);
 						}
 						else{
-							errorInfo tmp;
-							tmp.errCode=9;
 							if(del->data.attribute!=term::Int){
-								tmp.position=del->data.position;
+								return errorInfo(9,del->data.position);
 							}
 							else if(del2->data.attribute!=term::Int){
-								tmp.position=del2->data.position;
+								return errorInfo(9,del2->data.position);
 							}
-							return tmp;
+							return errorInfo(9);
 						}
 						begin->data.category=term::None;
 						begin->data.attribute=term::Int;
@@ -528,14 +385,10 @@ private:
 				tail=begin;
 			}
 			delete del;
-			--count;
 			if(del2!=NULL){
 				delete del2;
-				--count;
 			}
-			errorInfo tmp;
-			tmp.errCode=-1;
-			return tmp;
+			return errorInfo(-1);
 		}
 		void print(){
 			termNode* p=front;
@@ -545,149 +398,77 @@ private:
 			}
 		}
 	};
-
 	struct OprQueue{
-		queue<termNode*> zeroOrder;
-		queue<termNode*> firstOrder;
-		queue<termNode*> secondOrder;
-		queue<termNode*> thirdOrder;
+		queue<termNode*> q[4];
 	};
-
 	struct expression{
 		termList expr;
 		OprQueue opr;
-		void push(int val,int pos){
-			term* tmp=new term;
-			tmp->attribute=term::Int;
-			tmp->val.ival=val;
-			tmp->category=term::None;
-			tmp->position=pos;
+		void pushNode(term* tmp,int order=0){
 			expr.push(*tmp);
+			if(tmp->category!=term::None){
+				opr.q[order].push(expr.tail);
+			}
+		}
+		void push(int val,int pos){
+			term* tmp=new term(val,pos,term::Int,term::None);
+			pushNode(tmp);
 		}
 		void push(double val,int pos){
-			term* tmp=new term;
-			tmp->attribute=term::Float;
-			tmp->val.dval=val;
-			tmp->category=term::None;
-			tmp->position=pos;
-			expr.push(*tmp);
+			term* tmp=new term(val,pos,term::Float,term::None);
+			pushNode(tmp);
+		}
+		void push(double(*p)(double,double),int pos,term::oprType opr_type=term::RR,int order=0){
+			term* tmp=new term(p,pos,term::biDouble,opr_type);
+			pushNode(tmp,order);
+		}
+		void push(double(*p)(double),int pos,term::oprType opr_type=term::R,int order=0){
+			term* tmp=new term(p,pos,term::uniDouble,opr_type);
+			pushNode(tmp,order);
+		}
+		void push(int(*p)(int,int),int pos,term::oprType opr_type=term::RR,int order=0){
+			term* tmp=new term(p,pos,term::biInt,opr_type);
+			pushNode(tmp,order);
+		}
+		void push(int(*p)(int),int pos,term::oprType opr_type=term::R,int order=0){
+			term* tmp=new term(p,pos,term::uniInt,opr_type);
+			pushNode(tmp,order);
 		}
 		void push(char ch,int pos){
-			term* tmp=new term;
+			term* tmp;
 			switch(ch){
 				case '+':
-					tmp->attribute=term::biDouble;
-					tmp->val.ptr1=Add;
-					tmp->category=term::LR;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.thirdOrder.push(expr.tail);
+					push(Add,pos,term::LR,3);
 					break;
 				case '-':
-					tmp->attribute=term::biDouble;
-					tmp->val.ptr1=Minus;
-					tmp->category=term::LR;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.thirdOrder.push(expr.tail);
+					push(Minus,pos,term::LR,3);
 					break;
 				case '*':
-					tmp->attribute=term::biDouble;
-					tmp->val.ptr1=Multiply;
-					tmp->category=term::LR;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.secondOrder.push(expr.tail);
+					push(Multiply,pos,term::LR,2);
 					break;
 				case '/':
-					tmp->attribute=term::biDouble;
-					tmp->val.ptr1=Divide;
-					tmp->category=term::LR;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.secondOrder.push(expr.tail);
+					push(Divide,pos,term::LR,2);
 					break;
 				case '^':
-					tmp->attribute=term::biDouble;
-					tmp->val.ptr1=pow;
-					tmp->category=term::LR;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.firstOrder.push(expr.tail);
+					push(pow,pos,term::LR,1);
 					break;
 				case '!':
-					tmp->attribute=term::uniInt;
-					tmp->val.ptr4=Factorial;
-					tmp->category=term::L;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.zeroOrder.push(expr.tail);
+					push(Factorial,pos,term::L);
 					break;
 				case '%':
-					tmp->attribute=term::biInt;
-					tmp->val.ptr3=Mod;
-					tmp->category=term::LR;
-					tmp->position=pos;
-					expr.push(*tmp);
-					opr.secondOrder.push(expr.tail);
+					push(Mod,pos,term::LR,2);
 					break;
 				default:cout<<"Error: Unidentified operator."<<endl;
 			}
 		}
-		void push(double(*p)(double,double),int pos){
-			term* tmp=new term;
-			tmp->attribute=term::biDouble;
-			tmp->val.ptr1=p;
-			tmp->category=term::RR;
-			tmp->position=pos;
-			expr.push(*tmp);
-			opr.zeroOrder.push(expr.tail);
-		}
-		void push(double(*p)(double),int pos){
-			term* tmp=new term;
-			tmp->attribute=term::uniDouble;
-			tmp->val.ptr2=p;
-			tmp->category=term::R;
-			tmp->position=pos;
-			expr.push(*tmp);
-			opr.zeroOrder.push(expr.tail);
-		}
-		void push(int(*p)(int,int),int pos){
-			term* tmp=new term;
-			tmp->attribute=term::biInt;
-			tmp->val.ptr3=p;
-			tmp->category=term::RR;
-			tmp->position=pos;
-			expr.push(*tmp);
-			opr.zeroOrder.push(expr.tail);
-		}
-		void push(int(*p)(int),int pos){
-			term* tmp=new term;
-			tmp->attribute=term::uniInt;
-			tmp->val.ptr4=p;
-			tmp->category=term::R;
-			tmp->position=pos;
-			expr.push(*tmp);
-			opr.zeroOrder.push(expr.tail);
-		}
 		errorInfo calculate(){
-			errorInfo err;
-			err.errCode=-1;
-			while(!opr.zeroOrder.isEmpty()){
-				err=expr.mergeAdjacent(opr.zeroOrder.pop());
-				if(err.errCode!=-1)return err;
-			}
-			while(!opr.firstOrder.isEmpty()){
-				err=expr.mergeAdjacent(opr.firstOrder.pop());
-				if(err.errCode!=-1)return err;
-			}
-			while(!opr.secondOrder.isEmpty()){
-				err=expr.mergeAdjacent(opr.secondOrder.pop());
-				if(err.errCode!=-1)return err;
-			}
-			while(!opr.thirdOrder.isEmpty()){
-				err=expr.mergeAdjacent(opr.thirdOrder.pop());
-				if(err.errCode!=-1)return err;
+			errorInfo err(-1);
+			for(int i=0;i<4;i++){
+				while(!opr.q[i].empty()){
+					err=expr.mergeAdjacent(opr.q[i].front());
+					opr.q[i].pop();
+					if(err.errCode!=-1)return err;
+				}
 			}
 			return err;
 		}
@@ -695,18 +476,44 @@ private:
 			expr.print();
 		}
 	};
-
 	struct result{
 		double value;
 		bool error;
-	};
-	
+		result(){}
+		result(double val,bool err=true):value(val),error(err){}
+		void set(double val,bool err){
+			value=val;
+			error=err;
+		}
+	};	
 	struct function{
 		char tag[nameLength];
 		term opr;
-	};
-	
-	
+		void set(char* funcName,double(*p)(double,double)){
+			tagCopy(tag,funcName);
+			opr.attribute=term::biDouble;
+			opr.category=term::RR;
+			opr.val.ptr1=p;
+		}
+		void set(char* funcName,double(*p)(double)){
+			tagCopy(tag,funcName);
+			opr.attribute=term::uniDouble;
+			opr.category=term::R;
+			opr.val.ptr2=p;
+		}
+		void set(char* funcName,int(*p)(int,int)){
+			tagCopy(tag,funcName);
+			opr.attribute=term::biInt;
+			opr.category=term::RR;
+			opr.val.ptr3=p;
+		}
+		void set(char* funcName,int(*p)(int)){
+			tagCopy(tag,funcName);
+			opr.attribute=term::uniInt;
+			opr.category=term::R;
+			opr.val.ptr4=p;
+		}
+	};	
 	struct matchTree{
 		struct treeNode{
 			function func;
@@ -785,6 +592,10 @@ private:
 		"Illegal characters.",
 		"Expression not finished."
 	};
+	void setErr(int code,bool isErr=true){
+		errCode=code;
+		err=isErr;
+	}
 	void readNumber(char* ch,int& i,expression& e,bool omit=false){
 		int ival=0;
 		int orig;
@@ -794,42 +605,32 @@ private:
 			while(isNumber(ch[++i])){
 				ival=ival*10+ch[i]-'0';
 			}
-			if(ch[i]=='\0'){
-				e.push(ival,orig);
+			if(ch[i]!='.'){
+				if(ch[i]=='\0'){
+					e.push(ival,orig);
+				}
+				else if(isOperator(ch[i])){
+					e.push(ival,orig);
+				}
+				else if(isAlphabet(ch[i])){
+					e.push(ival,orig);
+					e.push('*',i);
+				}
+				else if(ch[i]==','){
+					setErr(0);
+				}
+				else if(ch[i]==')'){
+					setErr(1);
+				}
+				else if(ch[i]=='('){
+					e.push(ival,orig);
+					e.push('*',i);
+				}
+				else{
+					setErr(2);
+				}
 				return;
 			}
-			else if(isOperator(ch[i])){
-				e.push(ival,orig);
-				return;
-			}
-			else if(isAlphabet(ch[i])){
-				e.push(ival,orig);
-				e.push('*',i);
-				return;
-			}
-			else if(ch[i]==','){
-				err=true;
-				errCode=0;
-				return;
-			}
-			else if(ch[i]==')'){
-				err=true;
-				errCode=1;
-				return;
-			}
-			else if(ch[i]=='('){
-				e.push(ival,orig);
-				e.push('*',i);
-				return;
-			}
-			else if(ch[i]=='.'){
-				;
-			}
-			else{
-				err=true;
-				errCode=2;
-				return;
-			}	
 		}
 		if(isNumber(ch[++i])){
 			if(omit)orig=i;
@@ -841,45 +642,27 @@ private:
 			}while(isNumber(ch[i]));
 			dval+=ival;
 			e.push(dval,orig);
-			if(ch[i]=='\0'){
-				return;
-			}
-			else if(isOperator(ch[i])){
-				return;
-			}
-			else if(isAlphabet(ch[i])){
+			if(isAlphabet(ch[i])){
 				e.push('*',i);
-				return;
 			}
 			else if(ch[i]==','){
-				err=true;
-				errCode=0;
-				return;
+				setErr(0);
 			}
 			else if(ch[i]=='('){
 				e.push('*',i);
-				return;
 			}
 			else if(ch[i]==')'){
-				err=true;
-				errCode=1;
-				return;
+				setErr(1);
 			}
 			else if(ch[i]=='.'){
-				err=true;
-				errCode=3;
-				return;
+				setErr(3);
 			}
-			else{
-				err=true;
-				errCode=2;
-				return;
+			else if(ch[i]!='\0' && !isOperator(ch[i])){
+				setErr(2);
 			}
 		}
 		else{
-			err=true;
-			errCode=4;
-			return;
+			setErr(4);
 		}
 	}
 	int readFunction(char* ch,int& i,expression& e,int offset){
@@ -889,116 +672,63 @@ private:
 			i=func.position;
 			return -1;
 		}
-		int rlt=readParameter(ch,i,e,&func,orig,offset);
-		if(rlt==-1){
-			return -1;
-		}
-		else if(rlt==-2){
-			return -2;
-		}
-		return 0;
+		return readParameter(ch,i,e,&func,orig,offset);
 	}
-	void readOperator(char* ch,int& i,expression& e){
-		if(e.expr.tail==NULL){
-			if(ch[i]!='+'&&ch[i]!='-'){
-				err=true;
-				errCode=5;
-				return;
+	void examineOpr(char* ch,int& i,expression& e,int Case){
+		if(isNumber(ch[i])||isAlphabet(ch[i])||ch[i]=='.'||ch[i]=='('){
+			if(Case==1){
+				e.push(0,i-1);
 			}
-			else if(ch[i]=='+'){
-				++i;
-				if(isNumber(ch[i])||isAlphabet(ch[i])||ch[i]=='.'||ch[i]=='('){
-					return;
-				}
-				else if(ch[i]=='\0'){
-					err=true;
-					errCode=12;
-					return;
-				}
-				else{
-					err=true;
-					errCode=6;
-					return;
-				}
+			if(Case==5){
+				e.push('!',i-2);
+			}
+			if(Case==1 || Case==2 || Case==4 || Case==5){
+				e.push(ch[i-1],i-1);
+			}
+			if(Case==4){
+				e.push('*',i-1);
+			}
+		}
+		else if(ch[i]=='\0'){
+			if(Case==4){
+				e.push('!',i-1);
 			}
 			else{
-				++i;
-				if(isNumber(ch[i])||isAlphabet(ch[i])||ch[i]=='.'||ch[i]=='('){
-					e.push(0,i-1);
-					e.push('-',i-1);
-					return;
-				}
-				else if(ch[i]=='\0'){
-					err=true;
-					errCode=12;
-					return;
-				}
-				else{
-					err=true;
-					errCode=6;
-					return;
-				}
+				setErr(12);		
 			}
 		}
 		else{
-			if(ch[i]!='!'){
-				if(isNumber(ch[i+1])||isAlphabet(ch[i+1])||ch[i+1]=='.'||ch[i+1]=='('){
-					e.push(ch[i],i);
-					++i;
-					return;
-				}
-				else if(ch[i+1]=='\0'){
-					err=true;
-					errCode=12;
-					return;
+			if(Case==4 && isOperator(ch[i])){
+				if(ch[i]=='!'){
+					setErr(7);
 				}
 				else{
-					err=true;
-					errCode=6;
-					return;
+					++i;
+					examineOpr(ch,i,e,5);
 				}
 			}
 			else{
-				++i;
-				if(isNumber(ch[i])||isAlphabet(ch[i])||ch[i]=='.'||ch[i]=='('){
-					e.push('!',i-1);
-					e.push('*',i-1);
-					return;
-				}
-				else if(ch[i]=='\0'){
-					e.push('!',i-1);
-					return;
-				}
-				else if(isOperator(ch[i])){
-					if(ch[i]=='!'){
-						err=true;
-						errCode=7;
-						return;
-					}
-					else{
-						if(isNumber(ch[i+1])||isAlphabet(ch[i+1])||ch[i+1]=='.'||ch[i+1]=='('){
-							e.push('!',i-1);
-							e.push(ch[i],i);
-							++i;
-							return;
-						}
-						else if(ch[i+1]=='\0'){
-							err=true;
-							errCode=12;
-							return;
-						}
-						else{
-							err=true;
-							errCode=6;
-							return;
-						}
-					}
-				}
-				else{
-					err=true;
-					errCode=6;
-					return;
-				}
+				setErr(6);
+			}
+		}
+	}
+	void readOperator(char* ch,int& i,expression& e){
+		if(e.expr.tail==NULL && ch[i]!='+' && ch[i]!='-'){
+			setErr(5);
+		}
+		else{
+			++i;
+			if(e.expr.tail==NULL && ch[i-1]=='-'){
+				examineOpr(ch,i,e,1);
+			}
+			else if(e.expr.tail!=NULL && ch[i-1]!='!'){
+				examineOpr(ch,i,e,2);
+			}
+			else if(e.expr.tail==NULL && ch[i-1]=='+'){
+				examineOpr(ch,i,e,3);
+			}
+			else{
+				examineOpr(ch,i,e,4);
 			}
 		}
 	}
@@ -1026,59 +756,33 @@ private:
 			}
 			if(node==NULL)break;
 		}
-		if(node==NULL){
-			err=true;
-			errCode=13;
-			term tmp;
-			tmp.val.ptr1=Fail;
-			tmp.attribute=term::biDouble;
-			tmp.category=term::RR;
-			tmp.position=orig;
-			return tmp;
-		}
-		else if(!isAlphabet(ch[i])&&node->func.tag[j]=='\0'){
-			term tmp;
-			tmp.attribute=node->func.opr.attribute;
-			tmp.category=node->func.opr.category;
-			tmp.position=orig;
+		if(node!=NULL && !isAlphabet(ch[i])&&node->func.tag[j]=='\0'){
 			switch(node->func.opr.attribute){
 				case term::biDouble:
-					tmp.val.ptr1=node->func.opr.val.ptr1;
-					break;
+					return term(node->func.opr.val.ptr1,orig,node->func.opr.attribute,node->func.opr.category);
 				case term::uniDouble:
-					tmp.val.ptr2=node->func.opr.val.ptr2;
-					break;
+					return term(node->func.opr.val.ptr2,orig,node->func.opr.attribute,node->func.opr.category);
 				case term::biInt:
-					tmp.val.ptr3=node->func.opr.val.ptr3;
-					break;
+					return term(node->func.opr.val.ptr3,orig,node->func.opr.attribute,node->func.opr.category);
 				case term::uniInt:
-					tmp.val.ptr4=node->func.opr.val.ptr4;
-					break;
+					return term(node->func.opr.val.ptr4,orig,node->func.opr.attribute,node->func.opr.category);
 				default:
 					cout<<"Exception";
+					setErr(13);
 			}
-			return tmp;
 		}
 		else{
-			err=true;
-			errCode=13;
-			term tmp;
-			tmp.val.ptr1=Fail;
-			tmp.attribute=term::biDouble;
-			tmp.category=term::RR;
-			tmp.position=orig;
-			return tmp;
+			setErr(13);
 		}
+		return term(Fail,orig,term::biDouble,term::RR);
 	}
 	int readParameter(char* ch,int& i,expression& e,term* t,int begin,int offset){
 		if(ch[i]=='\0'){
-			err=true;
-			errCode=14;
+			setErr(14);
 			return -1;
 		}
 		else if(ch[i]!='('){
-			err=true;
-			errCode=15;
+			setErr(15);
 			return -1;
 		}
 		else{
@@ -1108,15 +812,13 @@ private:
 						++rbr;
 					}
 					if(ch[i]=='\0'){
-						err=true;
-						errCode=19;
+						setErr(19);
 						return -1;
 					}
 					if(lbr==rbr&&ch[i]==','){
 						++paraCnt;
 						if(paraCnt>paraNum){
-							err=true;
-							errCode=17;
+							setErr(17);
 							return -1;
 						}
 						else{
@@ -1140,8 +842,7 @@ private:
 				}
 			}
 			if(paraCnt<paraNum){
-				err=true;
-				errCode=16;
+				setErr(16);
 				return -1;
 			}
 			switch(t->attribute){
@@ -1178,75 +879,34 @@ private:
 				return 0;
 			}
 			else{
-				err=true;
-				errCode=18;
+				setErr(18);
 				return -1;
 			}		
 		}
 	}
 public:
 	calculator(){
-		tagCopy(functionTable[0].tag,"abs");
-		tagCopy(functionTable[1].tag,"acos");
-		tagCopy(functionTable[2].tag,"asin");
-		tagCopy(functionTable[3].tag,"atan");
-		tagCopy(functionTable[4].tag,"cos");
-		tagCopy(functionTable[5].tag,"exp");
-		tagCopy(functionTable[6].tag,"ln");
-		tagCopy(functionTable[7].tag,"log");
-		tagCopy(functionTable[8].tag,"pow");
-		tagCopy(functionTable[9].tag,"sin");
-		tagCopy(functionTable[10].tag,"sqrt");
-		tagCopy(functionTable[11].tag,"tan");
-		functionTable[0].opr.val.ptr2=fabs;
-		functionTable[0].opr.attribute=term::uniDouble;
-		functionTable[0].opr.category=term::R;
-		functionTable[1].opr.val.ptr2=acos;
-		functionTable[1].opr.attribute=term::uniDouble;
-		functionTable[1].opr.category=term::R;
-		functionTable[2].opr.val.ptr2=asin;
-		functionTable[2].opr.attribute=term::uniDouble;
-		functionTable[2].opr.category=term::R;
-		functionTable[3].opr.val.ptr2=atan;
-		functionTable[3].opr.attribute=term::uniDouble;
-		functionTable[3].opr.category=term::R;
-		functionTable[4].opr.val.ptr2=cos;
-		functionTable[4].opr.attribute=term::uniDouble;
-		functionTable[4].opr.category=term::R;
-		functionTable[5].opr.val.ptr2=exp;
-		functionTable[5].opr.attribute=term::uniDouble;
-		functionTable[5].opr.category=term::R;
-		functionTable[6].opr.val.ptr2=log;
-		functionTable[6].opr.attribute=term::uniDouble;
-		functionTable[6].opr.category=term::R;
-		functionTable[7].opr.val.ptr2=log10;
-		functionTable[7].opr.attribute=term::uniDouble;
-		functionTable[7].opr.category=term::R;
-		functionTable[8].opr.val.ptr1=pow;
-		functionTable[8].opr.attribute=term::biDouble;
-		functionTable[8].opr.category=term::RR;
-		functionTable[9].opr.val.ptr2=sin;
-		functionTable[9].opr.attribute=term::uniDouble;
-		functionTable[9].opr.category=term::R;
-		functionTable[10].opr.val.ptr2=sqrt;
-		functionTable[10].opr.attribute=term::uniDouble;
-		functionTable[10].opr.category=term::R;
-		functionTable[11].opr.val.ptr2=tan;
-		functionTable[11].opr.attribute=term::uniDouble;
-		functionTable[11].opr.category=term::R;
+		functionTable[0].set("abs",fabs);
+		functionTable[1].set("acos",acos);
+		functionTable[2].set("asin",asin);
+		functionTable[3].set("atan",atan);
+		functionTable[4].set("cos",cos);
+		functionTable[5].set("exp",exp);
+		functionTable[6].set("ln",log);
+		functionTable[7].set("log",log10);
+		functionTable[8].set("pow",pow);
+		functionTable[9].set("sin",sin);
+		functionTable[10].set("sqrt",sqrt);
+		functionTable[11].set("tan",tan);
 		fTree=new matchTree(functionTable,12);
 	}
 	~calculator(){
 		delete fTree;
 	}
 	result calculate(char* ch,int offset=0){
-		err=false;
-		errCode=-1;
+		setErr(-1,false);
 		if(ch[0]=='\0'){
-			result tmp;
-			tmp.value=0;
-			tmp.error=false;
-			return tmp;
+			return result(0,false);
 		}
 		int i=0;
 		expression* e=new expression;
@@ -1263,10 +923,7 @@ public:
 			else if(isAlphabet(ch[i])){
 				int rlt=readFunction(ch,i,*e,offset);
 				if(rlt==-2){
-					result tmp;
-					tmp.value=0;
-					tmp.error=true;
-					return tmp;
+					return result(0);
 				}
 			}
 			else if(ch[i]=='('){
@@ -1282,8 +939,7 @@ public:
 						++rbr;
 					}
 					if(ch[i]=='\0'){
-						err=true;
-						errCode=1;
+						setErr(1);
 						i=orig;
 						break;
 					}
@@ -1303,32 +959,22 @@ public:
 						}
 					}
 					else{
-						result tmp;
-						tmp.value=0;
-						tmp.error=true;
-						return tmp;
+						return result(0,true);
 					}
 				}
 			}
 			else{
-				err=true;
-				errCode=2;
+				setErr(2);
 			}
 			if(err){
 				cout<<"Position:"<<offset+i+1<<" Error Code:"<<errCode<<endl<<errMsg[errCode];
-				result tmp;
-				tmp.value=0;
-				tmp.error=true;
-				return tmp;
+				return result(0,true);
 			}
 		}
 		errorInfo eInfo=e->calculate();
 		if(eInfo.errCode!=-1){
 			cout<<"Position:"<<offset+eInfo.position+1<<" Error Code:"<<eInfo.errCode<<endl<<errMsg[eInfo.errCode];
-			result tmp;
-			tmp.value=0;
-			tmp.error=true;
-			return tmp;
+			return result(0,true);
 		}
 		if(offset==0){
 			cout<<"=";
@@ -1336,17 +982,15 @@ public:
 		}
 		result tmp;
 		if(e->expr.front->data.attribute==term::Float){
-			tmp.value=e->expr.front->data.val.dval;
+			tmp.set(e->expr.front->data.val.dval,false);
 		}
 		else if(e->expr.front->data.attribute==term::Int){
-			tmp.value=e->expr.front->data.val.ival;
+			tmp.set(e->expr.front->data.val.ival,false);
 		}
-		tmp.error=false;
 		delete e;
 		return tmp;
 	}
 };
-
 int main(){
 	calculator c;
 	char expr[1000];
